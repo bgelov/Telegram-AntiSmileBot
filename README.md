@@ -1,8 +1,8 @@
 # Telegram-AntiSmileBot
 https://t.me/AntiSmileBot
 
-##EN
+## EN
 AntiSmileBot for Telegram groups deletes messages that contain smiles and stickers.
 
-##RU
+## RU
 AntiSmileBot для групп Telegram удаляет сообщения, содержащие смайлы и стикеры.
