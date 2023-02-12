@@ -3,14 +3,11 @@ https://t.me/AntiSmileBot
 
 Telegram Python webhook bot on AWS infrastructure (Lambda, API Gateway, DynamoDB).
 
-## EN
-AntiSmileBot for Telegram groups deletes messages that contain smiles and stickers.
-
-## RU
-AntiSmileBot для групп Telegram удаляет сообщения, содержащие смайлы и стикеры.
+AntiSmileBot delete posts with emoticons, stickers, pictures and files in your telegram group chats.
+For group chats, you'll be able to set up a whitelist with those who can send emoticons to the group and set up autoreply for messages with smiley face.
 
 
-# For start:
+## How it works:
 0) send /start command to @AntiSmileBot.
 1) add bot to the group as administrator with delete messages permission.
 2) send command /initantismilebot to the group.
@@ -19,13 +16,13 @@ AntiSmileBot для групп Telegram удаляет сообщения, со�
 
 ![image](https://user-images.githubusercontent.com/5302940/218295987-2b2252bb-338f-4177-bcc0-61517bce1e8b.png)
 
-## Whitelist
+### Whitelist
 You can create, view and edit whitelist for you group throught bot commands.
 
 
 ![image](https://user-images.githubusercontent.com/5302940/218296181-d4d1e76e-b37b-477c-97d4-f61707ae00e1.png)
 
-## Autoreply
+### Autoreply
 And you can view and set autoreply for deleted messages (with smiles).
 
 
