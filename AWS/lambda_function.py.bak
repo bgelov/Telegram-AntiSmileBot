@@ -12,10 +12,8 @@ table_admins = dynamodb.Table('antiSmileBot_admins')
 table_autoreply = dynamodb.Table('antiSmileBot_autoreply')
 
 # Variables =====
-# Telegram api url
 API_URL = 'https://api.telegram.org/bot'
-# Regexp for clean text without smiles pictures
-REGEX = re.compile(r'^[\w\s\!\@\#\$\%\^\&\*\(\)\+\=\"\№\;\%\:\?\{\}\[\]\:\;\'\"\«\»\<\>\,\.\/\\~\`\₽\€\-\−\–\—\¿\¡\£\¥]*$')
+
 
 # ====================================
 # Functions for Telegram process =====
@@ -39,22 +37,13 @@ def delete_message(chat_id, message_id):
 # Send message to chat/group
 # https://core.telegram.org/bots/api#sendmessage
 # Use MarkdownV2 style
-def send_message(chat_id, text, message_thread_id=None):
-    if message_thread_id == None:
-        url = f'{API_URL}{API_KEY}/sendMessage'
-        payload = {
-                    'chat_id': chat_id,
-                    'text': text,
-                    'parse_mode': 'markdown'
-                    }
-    else:
-        url = f'{API_URL}{API_KEY}/sendMessage'
-        payload = {
-                    'chat_id': chat_id,
-                    'message_thread_id': message_thread_id,
-                    'text': text,
-                    'parse_mode': 'markdown'
-                    }
+def send_message(chat_id, text):
+    url = f'{API_URL}{API_KEY}/sendMessage'
+    payload = {
+                'chat_id': chat_id,
+                'text': text,
+                'parse_mode': 'markdown'
+                }
     try:
         r = requests.post(url,json=payload)
         return True
@@ -249,7 +238,6 @@ def add_to_chat_admins(chat_id, admin_id):
 def lambda_handler(event, context):
     # Get http request from telegram
     body = json.loads(event['body'])
-
     try:
         msg = body['message']
         handle_message(msg)
@@ -266,119 +254,29 @@ def lambda_handler(event, context):
 
 # Processing message
 def handle_message(msg):
-    
-    # Is video message?
-    is_video = None
-    try:
-        is_video = msg['video']
-    except:
-        is_video = None
-        
-    # Is message in topic group?
-    is_topic_message = None
-    message_thread_id = None
-    try:
-        # Check if it group with topics
-        is_forum = msg['chat']['is_forum']
-        message_thread_id = msg['message_thread_id']
-    except:
-        is_topic_message = None
-        message_thread_id = None
-    
-    
-    # Is photo?
-    is_photo = None
-    try:
-        # Check if it photo
-        is_photo = msg['photo']
-    except:
-        is_photo = None
-
-    # Is photo with caption?
-    caption = None
-    try:
-        caption = msg['caption']
-    except:
-        caption = None
-        
-    
+    # Processing message
     # Message ID, integer
     message_id = msg['message_id']
     # Chat ID, integer or string
     chat_id = msg['chat']['id']
     # User object
     sender_from = msg['from']['id']
-    
-    sender_first_name = ""
-    try:
-        sender_first_name = msg['from']['first_name']
-    except:
-        sender_first_name = ""
-    
-    sender_last_name = ""
-    try:
-        sender_last_name = msg['from']['last_name']
-    except:
-        sender_last_name = ""
-    
-    sender_username = "None"
-    try:
-        sender_username = msg['from']['username']
-        sender_username_markdown = sender_username.replace("_","\_")
-    except:
-        sender_username = f" {sender_first_name} {sender_last_name} id{msg['from']['id']}"
-        sender_username_markdown = f" {sender_first_name} {sender_last_name} id{msg['from']['id']}"
-
-
-    # Get whitelist for chat
-    whitelist = get_whitelist(chat_id)
-
+    sender_first_name = msg['from']['first_name']
+    sender_last_name = msg['from']['last_name']
+    sender_username = msg['from']['username']
 
     message_text = None
     try:
         # Get text message
         message_text = msg['text']
     except:
-        if is_photo == None and is_video == None:
-            # Check if user not in whitelist 
-            if str(sender_from) not in whitelist:
+        # Delete message if it file, sticker, audio, etc...
+        delete_message(chat_id, message_id )
+        response = {
+            'statusCode': 200
+        }
+        return response
     
-                # Delete message if it file, sticker, audio, etc...
-                delete_message(chat_id, message_id)
-                autoreply_text = get_autoreply(chat_id)
-                if autoreply_text == "":
-                    autoreply_text = f"Message from @{sender_username_markdown} was deleted"
-                else:
-                    autoreply_text = autoreply_text.replace("<sender-username>", f"@{sender_username_markdown}")
-                    autoreply_text = autoreply_text.replace("<sender-id>", f"{str(sender_from)}")
-                send_message(chat_id, autoreply_text, message_thread_id)
-                
-                response = {
-                    'statusCode': 200
-                }
-                return response
-                
-        elif caption != None:
-            # Check if user not in whitelist 
-            if str(sender_from) not in whitelist:
-                
-                # Delete message if it not good for regexp
-                if not REGEX.match(caption):
-                    delete_message(chat_id, message_id)
-                    autoreply_text = get_autoreply(chat_id)
-                    if autoreply_text == "":
-                        autoreply_text = f"Message from @{sender_username_markdown} was deleted"
-                    else:
-                        autoreply_text = autoreply_text.replace("<sender-username>", f"@{sender_username_markdown}")
-                        autoreply_text = autoreply_text.replace("<sender-id>", f"{str(sender_from)}")
-                    send_message(chat_id, autoreply_text, message_thread_id)
-                    
-                    response = {
-                        'statusCode': 200
-                    }
-                    return response
-                    
-                    
     # If it text message
     
     
@@ -397,11 +295,11 @@ def handle_message(msg):
             
         # Bot status
         if command_param[0] == "/getstatus":
-            send_message(sender_from, f"Hi @{sender_username_markdown}, everything is fine!")
+            send_message(sender_from, f"Hi @{sender_username}, everything is fine!")
         
         # Get user id
         elif command_param[0] == "/getmyid":
-            send_message(sender_from, f"@{sender_username_markdown}, your Telegram id: {sender_from}")
+            send_message(sender_from, f"@{sender_username}, your Telegram id: {sender_from}")
             
         # Manage group chats settings
         elif command_param[0] == "/getmygroups":
@@ -427,10 +325,10 @@ def handle_message(msg):
                 if len(white_list) > 0:
                     for wl in white_list:
                         text_whitelist += f"\nid{wl} \u2013 {get_username_by_id(wl)}\n/rem\_{wl}\_{command_param[1]}\n"
-                    text_whitelist += f"\nIf you need *remove* user from whitelist, click the command /rem\_user-id\_{command_param[1]} in the list above."
+                    text_whitelist += f"\nIf you need *remove* user from whitelist, click the command /rem\_<user-id>\_{command_param[1]} in the list above."
                 else:
                     text_whitelist += "\nWhitelist is empty.\n"
-                text_whitelist += f"\nIf you want *add* user to whitelist for this group, send me command \n/add\_user-id\_{command_param[1]}"
+                text_whitelist += f"\nIf you want *add* user to whitelist for this group, send me command \n/add\_<user-id>\_{command_param[1]}"
                 send_message(sender_from, text_whitelist)
                 send_message(sender_from, "The user can find out his ID by sending @AntiSmileBot the /getmyid command.\nAsk the user to forward the message with user ID to you.")
             else:
@@ -547,25 +445,31 @@ def handle_message(msg):
                     delete_message(chat_id, message_id)
                     add_to_chat_admins(chat_id, sender_from)
                     set_autoreply_for_chat(chat_id, "Message from <sender-username> was deleted")
-                    init_message = f"Hi, @{sender_username_markdown}!\nI linked your account with {get_chat_title_by_id(chat_id)}. Now you can send me the following commands:\n/getstatus - Get the bot's working status.\n/getmyid - Get your Telegram ID. To add a user.\n/getmygroups - Show your groups and manage whitelist.\n"
+                    init_message = f"Hi, @{sender_username}!\nI linked your account with {get_chat_title_by_id(chat_id)}. Now you can send me the following commands:\n/getstatus - Get the bot's working status.\n/getmyid - Get your Telegram ID. To add a user.\n/getmygroups - Show your groups and manage whitelist.\n"
                     send_message(sender_from, init_message)
                     return True
 
 
     # Processing message if it not command
-
+    
+    # Get whitelist for chat
+    whitelist = get_whitelist(chat_id)
+    
     # Check if user not in whitelist 
     if str(sender_from) not in whitelist:
+        
+        # Regexp for clean text without smiles pictures
+        regex = re.compile(r'^[\w\s\!\@\#\$\%\^\&\*\(\)\+\=\"\№\;\%\:\?\{\}\[\]\:\;\'\"\«\»\<\>\,\.\/\\~\`\₽\€\-\−\–\—\¿\¡\£\¥]*$')
     
         # Delete message if it not good for regexp
-        if not REGEX.match(message_text):
+        if not regex.match(message_text):
             delete_message(chat_id, message_id)
             autoreply_text = get_autoreply(chat_id)
             if autoreply_text == "":
-                autoreply_text = f"Message from @{sender_username_markdown} was deleted"
+                autoreply_text = f"Message from @{sender_username} was deleted"
             else:
-                autoreply_text = autoreply_text.replace("<sender-username>", f"@{sender_username_markdown}")
+                autoreply_text = autoreply_text.replace("<sender-username>", f"@{sender_username}")
                 autoreply_text = autoreply_text.replace("<sender-id>", f"{str(sender_from)}")
-            send_message(chat_id, autoreply_text, message_thread_id)
+            send_message(chat_id, autoreply_text)
     
     return True
