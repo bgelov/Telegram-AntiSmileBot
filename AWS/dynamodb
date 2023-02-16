@@ -1,3 +1,47 @@
 Table 1: antiSmileBot_whitelist
+
+Partition key
+admin_id (String)
+Sort key
+chat_id (String)
+
+{
+  "chat_id": {
+    "S": "-11111111111"
+  },
+  "from_id": {
+    "S": "11111111"
+  }
+}
+
+
 Table 2: antiSmileBot_admins
+
+Partition key
+admin_id (String)
+Sort key
+chat_id (String)
+
+{
+  "admin_id": {
+    "S": "48080584"
+  },
+  "chat_id": {
+    "S": "-1001743123477"
+  }
+}
+
+
 Table 3: antiSmileBot_autoreply
+
+Partition key
+chat_id (String)
+
+{
+  "chat_id": {
+    "S": "-11111111111"
+  },
+  "text": {
+    "S": "Message from <sender-username> was deleted"
+  }
+}
