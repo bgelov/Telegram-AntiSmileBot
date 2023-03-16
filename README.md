@@ -3,7 +3,7 @@ https://t.me/AntiSmileBot
 
 Telegram Python webhook bot on AWS infrastructure (Lambda, API Gateway, DynamoDB).
 
-AntiSmileBot delete posts with emoticons, stickers, pictures and files in your telegram group chats.
+AntiSmileBot delete posts with emoticons, stickers and files in your telegram group chats.
 For group chats, you'll be able to set up a whitelist with those who can send emoticons to the group and set up autoreply for messages with smiley face.
 
 
