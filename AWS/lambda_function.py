@@ -15,7 +15,7 @@ table_autoreply = dynamodb.Table('antiSmileBot_autoreply')
 # Telegram api url
 API_URL = 'https://api.telegram.org/bot'
 # Regexp for clean text without smiles pictures
-REGEX = re.compile(r'^[\w\s\!\@\#\$\%\^\&\*\(\)\+\=\"\№\;\%\:\?\{\}\[\]\:\;\'\"\«\»\<\>\,\⠀\ㅤ\.\/\\~\`\₽\€\-\−\–\—\¿\¡\£\¥\…\×\«\‹\»\›\„\“\‟\”\’\"\〝\〞\〟\＂\‚\‘\‛\❛\❜]*$')
+REGEX = re.compile(r'^[\w\s\!\@\#\$\%\^\&\*\(\)\+\=\"\№\;\%\:\?\{\}\[\]\:\;\'\"\«\»\<\>\,\•\⠀\ㅤ\.\/\\~\`\₽\€\-\−\–\—\¿\¡\£\¥\…\×\«\‹\»\›\„\“\‟\”\’\"\〝\〞\〟\＂\‚\‘\‛\❛\❜]*$')
 
 # ====================================
 # Functions for Telegram process =====
